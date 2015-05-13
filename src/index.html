@@ -1,0 +1,90 @@
+<!doctype html>
+<%
+var loans = csv.loans.filter(function(row) {
+  return row.rate;
+});
+var rateMax = 0;
+var amountMax = 0;
+var matrix = {};
+loans.forEach(function(loan) {
+  var rate = Math.round(loan.rate);
+  if (rate > rateMax) rateMax = rate;
+  var amount = Math.round(loan.amount / 10) * 10;
+  if (amount > amountMax) amountMax = amount;
+  var key = [rate, amount].join("-");
+  if (!matrix[key]) {
+    matrix[key] = {
+      rate: rate,
+      amount: amount,
+      clayton: 0,
+      other: 0,
+      count: 0
+    };
+  }
+  var counter = matrix[key];
+  counter.count++;
+  if (loan.company.trim().toLowerCase() == "clayton") {
+    counter.clayton++;
+  } else {
+    counter.other++;
+  }
+});
+
+var countMax = 0;
+var claytonMax = 0;
+var reduced = [];
+for (var key in matrix) {
+  var item = matrix[key];
+  reduced.push(item);
+
+  if (item.count > countMax) countMax = item.count;
+  if (item.clayton > claytonMax) claytonMax = item.clayton;
+}
+
+%>
+<html>
+  <head>
+    <title><%= json.project.title %></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <%= t.include("partials/_adHead.html") %>
+  </head>
+  <body>
+
+    <responsive-child>
+      <main class="interactive" ng-app="loanLegislation">
+        <div ng-controller="Heatmap">
+          <nav>
+            <a ng-click="colorFilter = 'clayton'">Clayton</a>
+            <a ng-click="colorFilter = 'count'">Total</a>
+          </nav>
+          <figure class="heatmap">
+            <div
+              class="cell"
+              ng-repeat="loan in loans"
+              ng-style="getStyles(loan)"
+              ></div>
+          </figure>
+        </div>
+      </main>
+    </responsive-child>
+
+    <script>
+window.loanData = <%= JSON.stringify({
+  data: reduced,
+  max: {
+    rate: rateMax,
+    amount: amountMax,
+    clayton: claytonMax,
+    count: countMax
+  }
+}) %>;
+    </script>
+    <script src="app.js"></script>
+    <% if (json.project.production) { %>
+    <%= !json.project.embedded ? t.include("partials/_adFoot.html") : "" %>
+    <%= t.include("partials/_workHere.html") %>
+    <% } %>
+  </body>
+</html>
