@@ -7,18 +7,108 @@
 
 @import "seattletimes";
 
-@rows: 22;
-@columns: 31;
+@rows: (21 - 1.5) * 2;
+@columns: 30;
+
+nav {
+  a {
+    display: inline-block;
+    padding: 8px;
+    color: @df-blue;
+    background: @df-light-gray;
+    cursor: pointer;
+    padding: 8px;
+    transition: background .2s linear;
+
+    &:hover {
+      background: @df-light-gray;
+    }
+  }
+}
 
 figure.heatmap {
   position: relative;
-  height: 400px;
+  height: 600px;
+  margin: 20px;
+  border: 4px solid black;
+  width: 600px;
 
   .cell {
     position: absolute;
-    width: 100% / @columns;
-    height: 100% / @rows;
-    background: @df-orange;
+    width: calc(100% / @columns ~" - 2px");
+    height: calc(100% / @rows ~" - 2px");
+    background: @df-light-gray;
+    transition: background .5s linear, outline .5s linear;
+
+    &.gap {
+      background: white;
+    }
+
+    [data-step~=count] & {
+      &.count-5 { background: green }
+      &.count-4 { background: lighten(green, 10%) }
+      &.count-3 { background: lighten(green, 20%) }
+      &.count-2 { background: lighten(green, 30%) }
+      &.count-1 { background: lighten(green, 40%) }
+    }
+
+    [data-step~=clayton] & {
+      &.clayton-5 { background: red }
+      &.clayton-4 { background: lighten(red, 10%) }
+      &.clayton-3 { background: lighten(red, 20%) }
+      &.clayton-2 { background: lighten(red, 30%) }
+      &.clayton-1 { background: lighten(red, 40%) }
+    }
+
+    [data-step~=other] & {
+      &.other-5 { background: blue }
+      &.other-4 { background: lighten(blue, 10%) }
+      &.other-3 { background: lighten(blue, 20%) }
+      &.other-2 { background: lighten(blue, 30%) }
+      &.other-1 { background: lighten(blue, 40%) }
+    }
+
+    [data-step=current] & {
+      &.current { outline: 2px solid black; }
+    }
+
+    [data-step=proposed] & {
+      &.proposed { outline: 2px solid black; }
+    }
+
+    [data-step="clayton proposed"] & {
+      &[class*=clayton].current:not(.proposed) { outline: 2px solid black }
+    }
   }
+}
+
+.interactive {
+  label {
+    display: none;
+
+    h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+    p {
+      font-size: 16px;
+    }
+  }
+
+
+  .visibility(@selector) {
+    [data-step="@{selector}"]  & label {
+      &[for="@{selector}"] {
+        display: block;
+      }
+    }
+  }
+
+  .visibility("count");
+  .visibility("clayton");
+  .visibility("other");
+  .visibility("current");
+  .visibility("proposed");
+  .visibility("clayton proposed");
 
 }

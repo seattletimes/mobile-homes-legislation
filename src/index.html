@@ -3,25 +3,21 @@
 var loans = csv.loans.filter(function(row) {
   return row.rate;
 });
-var rateMax = 0;
-var amountMax = 0;
-var matrix = {};
+var matrix = [];
 loans.forEach(function(loan) {
-  var rate = Math.round(loan.rate);
-  if (rate > rateMax) rateMax = rate;
+  var rate = Math.round(loan.rate * 2) / 2;
+  var row = rate * 2;
   var amount = Math.round(loan.amount / 10) * 10;
-  if (amount > amountMax) amountMax = amount;
-  var key = [rate, amount].join("-");
-  if (!matrix[key]) {
-    matrix[key] = {
-      rate: rate,
-      amount: amount,
-      clayton: 0,
-      other: 0,
-      count: 0
-    };
-  }
-  var counter = matrix[key];
+  var column = amount / 10;
+  if (!matrix[row]) matrix[row] = new Array(31);
+  if (!matrix[row][column]) matrix[row][column] = {
+    rate: rate,
+    amount: amount,
+    clayton: 0,
+    other: 0,
+    count: 0
+  };
+  var counter = matrix[row][column];
   counter.count++;
   if (loan.company.trim().toLowerCase() == "clayton") {
     counter.clayton++;
@@ -30,16 +26,33 @@ loans.forEach(function(loan) {
   }
 });
 
-var countMax = 0;
-var claytonMax = 0;
 var reduced = [];
-for (var key in matrix) {
-  var item = matrix[key];
-  reduced.push(item);
+for (var r = 0; r < matrix.length; r++) {
+  if (!matrix[r]) matrix[r] = new Array(31);
+  var arr = matrix[r];
+  for (var i = 0; i < arr.length; i++) {
+    if (!arr[i]) arr[i] = {
+      count: 0,
+      clayton: 0,
+      rate: r / 2,
+      amount: i * 10,
+      other: 0,
+      gap: true
+    }
+    reduced.push(arr[i]);
+  }
+};
 
-  if (item.count > countMax) countMax = item.count;
-  if (item.clayton > claytonMax) claytonMax = item.clayton;
-}
+var bounds = {};
+["count", "clayton", "rate", "amount"].forEach(function(key) {
+  var bound = bounds[key] = {};
+  var values = reduced.filter(function(d) { return d.count }).map(function(d) { return d[key] });
+  bound.max = Math.max.apply(null, values);
+  bound.min = Math.min.apply(null, values);
+});
+
+reduced = reduced.filter(function(d) { return d.rate >= bounds.rate.min });
+
 
 %>
 <html>
@@ -50,35 +63,70 @@ for (var key in matrix) {
     <link rel="stylesheet" type="text/css" href="style.css">
     <%= t.include("partials/_adHead.html") %>
   </head>
-  <body>
+  <body data-step="count">
 
     <responsive-child>
-      <main class="interactive" ng-app="loanLegislation">
-        <div ng-controller="Heatmap">
-          <nav>
-            <a ng-click="colorFilter = 'clayton'">Clayton</a>
-            <a ng-click="colorFilter = 'count'">Total</a>
-          </nav>
-          <figure class="heatmap">
-            <div
-              class="cell"
-              ng-repeat="loan in loans"
-              ng-style="getStyles(loan)"
-              ></div>
-          </figure>
-        </div>
+      <main class="interactive">
+        <figure class="heatmap"></figure>
+        <nav>
+          <a data-increment="-1">Previous</a>
+          <% ["count", "clayton", "other", "current", "proposed", "clayton proposed"].forEach(function(step, i) { %>
+          <a data-goto="<%= step %>"><%= i + 1 %></a>
+          <% }); %>
+          <a data-increment="1">Next</a>
+        </nav>
+
+        <!-- per-viz chatter -->
+        <label for="count">
+          <h1>The Loan Landscape</h1>
+          <p>
+            Floating-rate loans form a significant portion of mobile-home financing. On the heatmap above, we've collected these loans into buckets by rate spread (the amount of extra interest allowed on top of the base rate) and loan amount, with darker cells representing more loans at that spread/amount combination.
+          </p>
+        </label>
+
+        <label for="clayton">
+          <h1>Clayton's loans</h1>
+          <p>
+            Loans by Clayton Homes, a subsidiary of Warren Buffet's business empire, tend to be tightly clustered around the middle of this range, with the highest concentration (782 loans) for around $70,000 and a 7% spread.
+          </p>
+        </label>
+
+        <label for="other">
+          <h1>Other loans</h1>
+          <p>
+            By contrast, the non-Clayton loans are much less concentrated, and tend to have a much lower interest rate spread. That's important, because it means that the lender can't raise the rate suddenly on the borrowers.
+          </p>
+        </label>
+
+        <label for="current">
+          <h1>Current protection for borrowers</h1>
+          <p>
+            Legally, consumers qualify for some additional protections when their loans meet certain conditions. Currently, those protective measures kick in for loans under $50,000 with more than an 8.5% spread, or loans of at least $50,000 with a 6.5% or greater spread.
+          </p>
+        </label>
+
+        <label for="proposed">
+          <h1>Proposed protection</h1>
+          <p>
+            Legislation under debate, however, would alter those protections by raising the requirements needed to qualify. Under the new laws, loans under $75,000 would need a 10% spread before additional protections were granted. At $75,000 or more, they would need a 6.5% spread. That's a change of $25,000 required for loans with a low interest rate spread.
+          </p>
+        </label>
+
+        <label for="clayton proposed">
+          <h1>Clayton's gain, borrower's loss</h1>
+          <p>
+            When we overlay these changes with the Clayton loan data, however, it becomes very clear who benefits from the change in protection. The window opened up by the new legislation fits neatly over the greatest concentration of Clayton loans &mdash; more than XX% of them (XXX loans) would be exempted from additional consumer protections under the new law.
+          </p>
+        </label>
+
+
       </main>
     </responsive-child>
 
     <script>
 window.loanData = <%= JSON.stringify({
   data: reduced,
-  max: {
-    rate: rateMax,
-    amount: amountMax,
-    clayton: claytonMax,
-    count: countMax
-  }
+  bounds: bounds
 }) %>;
     </script>
     <script src="app.js"></script>
