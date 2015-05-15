@@ -3,13 +3,20 @@
 var loans = csv.loans.filter(function(row) {
   return row.rate;
 });
+
+var width = 61;
+var rateDivision = 2;
+var amountDivision = 5;
+
 var matrix = [];
 loans.forEach(function(loan) {
-  var rate = Math.round(loan.rate * 2) / 2;
-  var row = rate * 2;
-  var amount = Math.round(loan.amount / 10) * 10;
-  var column = amount / 10;
-  if (!matrix[row]) matrix[row] = new Array(31);
+  //rates are rounded up, because the conditions are always >
+  var rate = Math.ceil(loan.rate * rateDivision) / rateDivision;
+  var row = rate * rateDivision;
+  //amounts are rounded down, because their conditions are >=
+  var amount = Math.floor(loan.amount / amountDivision) * amountDivision;
+  var column = amount / amountDivision;
+  if (!matrix[row]) matrix[row] = new Array(width);
   if (!matrix[row][column]) matrix[row][column] = {
     rate: rate,
     amount: amount,
@@ -28,14 +35,14 @@ loans.forEach(function(loan) {
 
 var reduced = [];
 for (var r = 0; r < matrix.length; r++) {
-  if (!matrix[r]) matrix[r] = new Array(31);
+  if (!matrix[r]) matrix[r] = new Array(width);
   var arr = matrix[r];
   for (var i = 0; i < arr.length; i++) {
     if (!arr[i]) arr[i] = {
       count: 0,
       clayton: 0,
-      rate: r / 2,
-      amount: i * 10,
+      rate: r / rateDivision,
+      amount: i * amountDivision,
       other: 0,
       gap: true
     }
@@ -53,6 +60,21 @@ var bounds = {};
 
 reduced = reduced.filter(function(d) { return d.rate >= bounds.rate.min });
 
+//sanity check
+var counts = {
+  clayton: 0,
+  other: 0
+}
+reduced.forEach(function(item) {
+  if ((item.amount < 50 && item.rate > 8.5) || (item.amount >= 50 && item.rate > 6.5)) {
+    if ((item.amount < 75 && item.rate <= 10) || (item.amount >= 75 && item.rate <= 6.5)) {
+      counts.clayton += item.clayton;
+      counts.other += item.other;
+    }
+  }
+});
+console.log(counts);
+
 
 %>
 <html>
@@ -67,10 +89,12 @@ reduced = reduced.filter(function(d) { return d.rate >= bounds.rate.min });
 
     <responsive-child>
       <main class="interactive">
-        <figure class="heatmap"></figure>
+        <figure class="heatmap">
+          <canvas class="shader"></canvas>
+        </figure>
         <nav>
           <a data-increment="-1">Previous</a>
-          <% ["count", "clayton", "other", "current", "proposed", "clayton proposed"].forEach(function(step, i) { %>
+          <% ["count", "clayton", "other", "current", "proposed", "clayton proposed", "other proposed"].forEach(function(step, i) { %>
           <a data-goto="<%= step %>"><%= i + 1 %></a>
           <% }); %>
           <a data-increment="1">Next</a>
@@ -80,42 +104,49 @@ reduced = reduced.filter(function(d) { return d.rate >= bounds.rate.min });
         <label for="count">
           <h1>The Loan Landscape</h1>
           <p>
-            Floating-rate loans form a significant portion of mobile-home financing. On the heatmap above, we've collected these loans into buckets by rate spread (the amount of extra interest allowed on top of the base rate) and loan amount, with darker cells representing more loans at that spread/amount combination.
+            Mobile-home loans often have higher interest rates than  typical home loans have, and the gap between those loans gets reported to the government as a "rate spread." On the heat map above, we've collected all the mobile-home loans from 2013 that had a reported rate spread and show how rates compare based on the size of the loans. Darker cells represent more loans at that spread/amount combination.
           </p>
         </label>
 
         <label for="clayton">
           <h1>Clayton's loans</h1>
           <p>
-            Loans by Clayton Homes, a subsidiary of Warren Buffet's business empire, tend to be tightly clustered around the middle of this range, with the highest concentration (782 loans) for around $70,000 and a 7% spread.
+            Clayton Homes, owned by Warren Buffett's Berkshire Hathaway, is by far the mobile-home industry's largest lender. The company's loans tend to have rates far higher than those of  typical home loans. In 2013, Clayton's highest concentration of loans was for those around $70,000 and a rate spread of about 7 percentage points, meaning many Clayton interest rates likely exceeded 10 percent.
           </p>
         </label>
 
         <label for="other">
-          <h1>Other loans</h1>
+          <h1>Loans from other lenders</h1>
           <p>
-            By contrast, the non-Clayton loans are much less concentrated, and tend to have a much lower interest rate spread. That's important, because it means that the lender can't raise the rate suddenly on the borrowers.
+            In contrast, loans provided by non-Clayton lenders tend to have a much lower interest-rate spread. 
           </p>
         </label>
 
         <label for="current">
           <h1>Current protection for borrowers</h1>
           <p>
-            Legally, consumers qualify for some additional protections when their loans meet certain conditions. Currently, those protective measures kick in for loans under $50,000 with more than an 8.5% spread, or loans of at least $50,000 with a 6.5% or greater spread.
+            Sweeping reforms approved after the nation's financial crisis included protections for mobile-home loans with high interest rates. Under rules in effect in 2014, consumers get additional protections for loans that have a rate spread over 6.5 percentage points – or 8.5 percentage points if the loan is under $50,000.
           </p>
         </label>
 
         <label for="proposed">
-          <h1>Proposed protection</h1>
+          <h1>Proposed rollback</h1>
           <p>
-            Legislation under debate, however, would alter those protections by raising the requirements needed to qualify. Under the new laws, loans under $75,000 would need a 10% spread before additional protections were granted. At $75,000 or more, they would need a 6.5% spread. That's a change of $25,000 required for loans with a low interest rate spread.
+            Congress is considering a plan that would roll back some of the protections. Under the proposal, loans under $75,000 would need to have a rate spread of more than 10 percentage points to qualify for additional protections.
           </p>
         </label>
 
         <label for="clayton proposed">
           <h1>Clayton's gain, borrower's loss</h1>
           <p>
-            When we overlay these changes with the Clayton loan data, however, it becomes very clear who benefits from the change in protection. The window opened up by the new legislation fits neatly over the greatest concentration of Clayton loans &mdash; more than XX% of them (XXX loans) would be exempted from additional consumer protections under the new law.
+            The plan to curtail consumer protections would be a boon for Clayton. Under the proposed law, the segment of the loan pool that benefits most from the relaxed rules neatly matches the greatest concentration of Clayton loans. If the changes were applied to 2013 data, more than 5,100 of Clayton's loans would fall in the gap created by the new law.
+          </p>
+        </label>
+
+        <label for="other proposed">
+          <h1>Not much impact for other lenders</h1>
+          <p>
+            For other lenders, the proposed rollback would have minimal impact. In total, of the loans that had interest rates that would lose protections under the congressional plan, 91 percent were Clayton loans.
           </p>
         </label>
 

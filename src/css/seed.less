@@ -8,7 +8,19 @@
 @import "seattletimes";
 
 @rows: (21 - 1.5) * 2;
-@columns: 30;
+@columns: 60;
+
+@clayton: @st-dark-red;
+@other: @st-dark-blue;
+@loans: @st-dark-green;
+@protected: .4;
+@loss: .4;
+
+main.interactive {
+  display: block;
+  max-width: 600px;
+  margin: auto;
+}
 
 nav {
   a {
@@ -28,56 +40,108 @@ nav {
 
 figure.heatmap {
   position: relative;
-  height: 600px;
-  margin: 20px;
+  height: 400px;
+  // top: 100px;
+  // left: 100px;
   border: 4px solid black;
   width: 600px;
+  max-width: 100%;
+
+  canvas.shader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    transition: opacity .2s linear;
+    opacity: 0;
+
+    [data-step~=proposed] &, [data-step~=current] & {
+      opacity: 1;
+    }
+  }
 
   .cell {
+    z-index: 0;
     position: absolute;
-    width: calc(100% / @columns ~" - 2px");
-    height: calc(100% / @rows ~" - 2px");
+    width: calc(100% / @columns ~" + .5px");
+    height: calc(100% / @rows ~" + .5px");
+    // width: 100% / @columns;
+    // height: 100% / @rows;
+    // width: 11px;
+    // height: 11px;
     background: @df-light-gray;
-    transition: background .5s linear, outline .5s linear;
+    transition: background .5s linear, opacity .5s linear;
+    // outline: 1px solid white;
+    // transform: translateZ(0);
 
     &.gap {
-      background: white;
+      background: transparent;
     }
 
     [data-step~=count] & {
-      &.count-5 { background: green }
-      &.count-4 { background: lighten(green, 10%) }
-      &.count-3 { background: lighten(green, 20%) }
-      &.count-2 { background: lighten(green, 30%) }
-      &.count-1 { background: lighten(green, 40%) }
+      &.count-5 { background-color: darken(@loans, 50%) }
+      &.count-4 { background-color: darken(@loans, 40%) }
+      &.count-3 { background-color: darken(@loans, 30%) }
+      &.count-2 { background-color: darken(@loans, 20%) }
+      &.count-1 { background-color: darken(@loans, 10%) }
     }
 
     [data-step~=clayton] & {
-      &.clayton-5 { background: red }
-      &.clayton-4 { background: lighten(red, 10%) }
-      &.clayton-3 { background: lighten(red, 20%) }
-      &.clayton-2 { background: lighten(red, 30%) }
-      &.clayton-1 { background: lighten(red, 40%) }
+      & { background: transparent }
+      &.clayton-5 { background-color: darken(@clayton, 50%) }
+      &.clayton-4 { background-color: darken(@clayton, 40%) }
+      &.clayton-3 { background-color: darken(@clayton, 30%) }
+      &.clayton-2 { background-color: darken(@clayton, 20%) }
+      &.clayton-1 { background-color: darken(@clayton, 10%) }
     }
 
     [data-step~=other] & {
-      &.other-5 { background: blue }
-      &.other-4 { background: lighten(blue, 10%) }
-      &.other-3 { background: lighten(blue, 20%) }
-      &.other-2 { background: lighten(blue, 30%) }
-      &.other-1 { background: lighten(blue, 40%) }
+      & { background: transparent }
+      &.other-5 { background-color: darken(@other, 50%) }
+      &.other-4 { background-color: darken(@other, 40%) }
+      &.other-3 { background-color: darken(@other, 30%) }
+      &.other-2 { background-color: darken(@other, 20%) }
+      &.other-1 { background-color: darken(@other, 10%) }
     }
 
-    [data-step=current] & {
-      &.current { outline: 2px solid black; }
+    [data-step~=current] & {
+
+      &.current {
+        background: red;
+        opacity: @protected;
+      }
+
+      &.border {
+        border-width: 1px 1px 0 0;
+        border-color: black;
+        border-style: solid;
+      }
     }
 
-    [data-step=proposed] & {
-      &.proposed { outline: 2px solid black; }
+    [data-step~=proposed] & {
+      &.proposed {
+        background: red;
+        opacity: @protected;
+      }
+      &.current:not(.proposed) { 
+        background: blue;
+        opacity: @loss;
+      }
     }
 
-    [data-step="clayton proposed"] & {
-      &[class*=clayton].current:not(.proposed) { outline: 2px solid black }
+    [data-step="clayton proposed"] {
+
+      &.current:not(.proposed) {
+        outline: 1px solid white;
+      }
+
+      &.clayton-5.proposed { background-color: red }
+      &.clayton-4.proposed { background-color: darken(lighten(red, 10%), 20%) }
+      &.clayton-3.proposed { background-color: darken(lighten(red, 20%), 20%) }
+      &.clayton-2.proposed { background-color: darken(lighten(red, 30%), 20%) }
+      &.clayton-1.proposed { background-color: darken(lighten(red, 40%), 20%) }
     }
   }
 }
@@ -96,7 +160,7 @@ figure.heatmap {
   }
 
 
-  .visibility(@selector) {
+  .show-label(@selector) {
     [data-step="@{selector}"]  & label {
       &[for="@{selector}"] {
         display: block;
@@ -104,11 +168,12 @@ figure.heatmap {
     }
   }
 
-  .visibility("count");
-  .visibility("clayton");
-  .visibility("other");
-  .visibility("current");
-  .visibility("proposed");
-  .visibility("clayton proposed");
+  .show-label("count");
+  .show-label("clayton");
+  .show-label("other");
+  .show-label("current");
+  .show-label("proposed");
+  .show-label("clayton proposed");
+  .show-label("other proposed");
 
 }
