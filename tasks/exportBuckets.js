@@ -64,7 +64,6 @@ module.exports = function(grunt) {
 
     var csv = require("csv");
     var fs = require("fs");
-    console.log(Object.keys(reduced[0]));
     csv.stringify(reduced, { header: true }, function(err, output) {
       // console.log(output);
       fs.writeFileSync("output.csv", output);

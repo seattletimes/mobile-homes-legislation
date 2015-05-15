@@ -1,6 +1,8 @@
 <!doctype html>
 <%
 var loans = csv.loans.filter(function(row) {
+  if (row.rate > 15) return false;
+  if (row.amount > 150) return false;
   return row.rate;
 });
 
@@ -89,22 +91,36 @@ console.log(counts);
 
     <responsive-child>
       <main class="interactive">
+        <h1>Looser loan rules a boon for Buffett company</h1>
+
+        <p>
+          This heat map shows concentrations of 2013 mobile-home loans that had interest rates high enough to require disclosure.
+
         <figure class="heatmap">
+          <aside class="x-axis">
+            <div class="in-thousands">Loan amount (in thousands of dollars)</div>
+          </aside>
+          <aside class="y-axis"></aside>
           <canvas class="shader"></canvas>
+          <div class="tooltip"></div>
         </figure>
+
         <nav>
-          <a data-increment="-1">Previous</a>
-          <% ["count", "clayton", "other", "current", "proposed", "clayton proposed", "other proposed"].forEach(function(step, i) { %>
-          <a data-goto="<%= step %>"><%= i + 1 %></a>
-          <% }); %>
-          <a data-increment="1">Next</a>
+          <div class="instructions">Click below to advance</div>
+          <div class="bar">
+            <a data-increment="-1">Previous</a>
+            <% ["count", "clayton", "other", "current count", "proposed count", "clayton proposed", "other proposed"].forEach(function(step, i) { %>
+            <a data-goto="<%= step %>" class="<%= !i ? "selected" : "" %>"><%= i + 1 %></a>
+            <% }); %>
+            <a data-increment="1">Next</a>
+          <div>
         </nav>
 
         <!-- per-viz chatter -->
         <label for="count">
           <h1>The Loan Landscape</h1>
           <p>
-            Mobile-home loans often have higher interest rates than  typical home loans have, and the gap between those loans gets reported to the government as a "rate spread." On the heat map above, we've collected all the mobile-home loans from 2013 that had a reported rate spread and show how rates compare based on the size of the loans. Darker cells represent more loans at that spread/amount combination.
+            Mobile-home loans often have higher interest rates than  typical home loans have, and the gap between those loans gets reported to the government as a "rate spread." To get the real interest rate, add 3.9% to the stated rate spread.
           </p>
         </label>
 
@@ -122,14 +138,14 @@ console.log(counts);
           </p>
         </label>
 
-        <label for="current">
+        <label for="current count">
           <h1>Current protection for borrowers</h1>
           <p>
             Sweeping reforms approved after the nation's financial crisis included protections for mobile-home loans with high interest rates. Under rules in effect in 2014, consumers get additional protections for loans that have a rate spread over 6.5 percentage points – or 8.5 percentage points if the loan is under $50,000.
           </p>
         </label>
 
-        <label for="proposed">
+        <label for="proposed count">
           <h1>Proposed rollback</h1>
           <p>
             Congress is considering a plan that would roll back some of the protections. Under the proposal, loans under $75,000 would need to have a rate spread of more than 10 percentage points to qualify for additional protections.
@@ -149,7 +165,6 @@ console.log(counts);
             For other lenders, the proposed rollback would have minimal impact. In total, of the loans that had interest rates that would lose protections under the congressional plan, 91 percent were Clayton loans.
           </p>
         </label>
-
 
       </main>
     </responsive-child>

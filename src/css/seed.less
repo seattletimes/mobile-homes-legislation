@@ -6,13 +6,21 @@
 }
 
 @import "seattletimes";
+@import "flexbox";
 
-@rows: (21 - 1.5) * 2;
-@columns: 60;
+@rows: (15 - 1.5) * 2;
+@columns: 30;
 
-@clayton: @st-dark-red;
-@other: @st-dark-blue;
-@loans: @st-dark-green;
+@cellWidth: calc(100% / @columns ~" + .5px");
+@cellHeight: calc(100% / @rows ~" + .5px");
+// width: 100% / @columns;
+// height: 100% / @rows;
+// width: 11px;
+// height: 11px;
+
+@clayton: lighten(@st-dark-red, 10%);
+@other: lighten(@st-dark-blue, 10%);
+@loans: lighten(@st-dark-green, 10%);
 @protected: .4;
 @loss: .4;
 
@@ -20,20 +28,46 @@ main.interactive {
   display: block;
   max-width: 600px;
   margin: auto;
+  // padding: 8px;
 }
 
 nav {
+  font-family: @df-sans;
+  font-size: 16px;
+  background: @df-light-gray;
+
+  @media @mobile {
+    font-size: 12px;
+  }
+
+  .instructions {
+    text-align: center;
+  }
+
+  .bar {
+    .display-flex;
+  }
+
   a {
+    .flex(1);
+
+    &[data-increment] {
+      .flex(1 0);
+    }
     display: inline-block;
     padding: 8px;
     color: @df-blue;
-    background: @df-light-gray;
     cursor: pointer;
     padding: 8px;
     transition: background .2s linear;
+    text-align: center;
 
     &:hover {
       background: @df-light-gray;
+    }
+
+    &.selected {
+      font-weight: bold;
     }
   }
 }
@@ -41,11 +75,18 @@ nav {
 figure.heatmap {
   position: relative;
   height: 400px;
-  // top: 100px;
-  // left: 100px;
-  border: 4px solid black;
+  margin: 0 0 30px 25px;
+  // border: 4px solid black;
   width: 600px;
-  max-width: 100%;
+  max-width: calc(~"100% - 40px");
+  border-left: 1px solid @df-light-gray;
+  border-bottom: 1px solid @df-light-gray;
+
+  @media @mobile {
+    margin-left: 0;
+    height: 300px;
+    max-width: 100%;
+  }
 
   canvas.shader {
     position: absolute;
@@ -62,15 +103,99 @@ figure.heatmap {
     }
   }
 
+  .x-axis {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    height: 30px;
+    width: 100%;
+    font-family: @df-sans;
+    font-size: 10px;
+    color: black;
+    text-align: center;
+
+    label {
+      position: absolute;
+      top: 0;
+      display: block;
+      width: @cellWidth;
+    }
+
+    .in-thousands {
+      position: absolute;
+      display: block;
+      width: 100%;
+      bottom: 0;
+      font-size: 12px;
+    }
+  }
+
+  .y-axis {
+    position: absolute;
+    top: 0;
+    right: calc(~"100% + 2px");
+    width: 20px;
+    height: 100%;
+    text-shadow: 0 0 2px white;
+
+    @media @mobile {
+      right: 2px;
+      z-index: 999;
+    }
+
+    label {
+      position: absolute;
+      right: 0;
+      width: 30px;
+      text-align: right;
+      display: block;
+      color: black;
+      font-family: @df-sans;
+      font-size: 10px;
+    }
+  }
+
+  .tooltip {
+    position: absolute;
+    width: 180px;
+    background: white;
+    font-size: 14px;
+    font-family: @df-sans;
+    z-index: 999;
+    transition: -webkit-transform .2s ease-in-out;
+    transition: transform .2s ease-in-out;
+    -webkit-transform: translateX(0%) translateY(10px);
+    transform: translateX(0%) translateY(10px);
+    padding: 8px;
+    display: none;
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, .3);
+
+    &.show {
+      display: block;
+    }
+
+    &.right {
+      -webkit-transform: translateX(-100%) translateY(10px);
+      transform: translateX(-100%) translateY(10px);
+    }
+
+    h2 {
+      padding: 0;
+      font-size: inherit;
+    }
+
+    ul {
+      margin: 0;
+      list-style-type: none;
+      padding: 0;
+    }
+  }
+
   .cell {
     z-index: 0;
     position: absolute;
-    width: calc(100% / @columns ~" + .5px");
-    height: calc(100% / @rows ~" + .5px");
-    // width: 100% / @columns;
-    // height: 100% / @rows;
-    // width: 11px;
-    // height: 11px;
+    width: @cellWidth;
+    height: @cellHeight;
     background: @df-light-gray;
     transition: background .5s linear, opacity .5s linear;
     // outline: 1px solid white;
@@ -81,27 +206,36 @@ figure.heatmap {
     }
 
     [data-step~=count] & {
-      &.count-5 { background-color: darken(@loans, 50%) }
-      &.count-4 { background-color: darken(@loans, 40%) }
-      &.count-3 { background-color: darken(@loans, 30%) }
+      &.count-8 { background-color: darken(@loans, 50%) }
+      &.count-7 { background-color: darken(@loans, 45%) }
+      &.count-6 { background-color: darken(@loans, 40%) }
+      &.count-5 { background-color: darken(@loans, 35%) }
+      &.count-4 { background-color: darken(@loans, 30%) }
+      &.count-3 { background-color: darken(@loans, 25%) }
       &.count-2 { background-color: darken(@loans, 20%) }
       &.count-1 { background-color: darken(@loans, 10%) }
     }
 
     [data-step~=clayton] & {
       & { background: transparent }
-      &.clayton-5 { background-color: darken(@clayton, 50%) }
-      &.clayton-4 { background-color: darken(@clayton, 40%) }
-      &.clayton-3 { background-color: darken(@clayton, 30%) }
+      &.clayton-8 { background-color: darken(@clayton, 50%) }
+      &.clayton-7 { background-color: darken(@clayton, 45%) }
+      &.clayton-6 { background-color: darken(@clayton, 40%) }
+      &.clayton-5 { background-color: darken(@clayton, 35%) }
+      &.clayton-4 { background-color: darken(@clayton, 30%) }
+      &.clayton-3 { background-color: darken(@clayton, 25%) }
       &.clayton-2 { background-color: darken(@clayton, 20%) }
       &.clayton-1 { background-color: darken(@clayton, 10%) }
     }
 
     [data-step~=other] & {
       & { background: transparent }
-      &.other-5 { background-color: darken(@other, 50%) }
-      &.other-4 { background-color: darken(@other, 40%) }
-      &.other-3 { background-color: darken(@other, 30%) }
+      &.other-8 { background-color: darken(@other, 50%) }
+      &.other-7 { background-color: darken(@other, 45%) }
+      &.other-6 { background-color: darken(@other, 40%) }
+      &.other-5 { background-color: darken(@other, 35%) }
+      &.other-4 { background-color: darken(@other, 30%) }
+      &.other-3 { background-color: darken(@other, 25%) }
       &.other-2 { background-color: darken(@other, 20%) }
       &.other-1 { background-color: darken(@other, 10%) }
     }
@@ -152,10 +286,19 @@ figure.heatmap {
 
     h1 {
       font-size: 20px;
-      margin: 0;
+      // margin: 0;
+
+      @media @mobile {
+        font-size: 16px;
+      }
     }
     p {
       font-size: 16px;
+      margin-top: 0;
+
+      @media @mobile {
+        font-size: 14px;
+      }
     }
   }
 
@@ -171,8 +314,8 @@ figure.heatmap {
   .show-label("count");
   .show-label("clayton");
   .show-label("other");
-  .show-label("current");
-  .show-label("proposed");
+  .show-label("current count");
+  .show-label("proposed count");
   .show-label("clayton proposed");
   .show-label("other proposed");
 

@@ -3,6 +3,12 @@
 require("./lib/ads");
 require("component-responsive-frame/child");
 
+var dot = require("dot");
+dot.templateSettings.varname = "data";
+dot.templateSettings.evaluate = /<%([\s\S]+?)%>/g;
+dot.templateSettings.interpolate = /<%=([\s\S]+?)%>/g;
+var tipTemplate = dot.template(require("./_tooltip.html"));
+
 var loans = window.loanData;
 var figure = document.querySelector("figure.heatmap");
 var bounds = loans.bounds;
@@ -27,7 +33,8 @@ var redraw = function() {
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
   context.fillStyle = "rgba(0, 0, 0, .3)";
-  context.strokeStyle = "white";
+  context.strokeStyle = "black";
+  context.lineWidth = 2;
   context.setLineDash([5, 5]);
   //create current path
   context.beginPath();
@@ -39,12 +46,9 @@ var redraw = function() {
   context.lineTo(-10, -10);
   if (mode == "current") {
     //shade this area
-    console.log("filling current");
-    context.closePath();
     context.fill();
     return;
   }
-  console.log("stroke current, fill proposed");
   context.stroke();
 
   //create proposed path
@@ -56,14 +60,21 @@ var redraw = function() {
   context.lineTo(canvas.width + 10, -10);
   context.lineTo(-10, -10);
   context.fill();
+  // context.strokeStyle = "black";
+  // context.stroke();
 };
 
 redraw();
 window.addEventListener("resize", redraw);
 
+var steps = 8;
+var lookup = {};
+
 loans.data.forEach(function(loan) {
   if (loan.gap) return;
   augment(loan);
+  var key = loan.rate + "-" + loan.amount
+  lookup[key] = loan;
   var div = document.createElement("div");
   div.className = "cell";
   var r = scaleRate(loan.rate);
@@ -73,42 +84,50 @@ loans.data.forEach(function(loan) {
   div.setAttribute("data-rate", loan.rate);
   div.setAttribute("data-amount", loan.amount);
   div.setAttribute("data-count", loan.count);
+  div.setAttribute("data-lookup", key);
   //cover loans that happen
   if (loan.gap) {
     div.classList.add("gap");
   } else {
     var ratio = loan.ratio;
     for (var key in ratio) {
-      if (ratio[key] > .8) {
-        div.classList.add(key + "-5");
-      } else if (ratio[key] > .6) {
-        div.classList.add(key + "-4");
-      } else if (ratio[key] > .4) {
-        div.classList.add(key + "-3");
-      } else if (ratio[key] > .2) {
-        div.classList.add(key + "-2");
-      } else if (ratio[key] > 0) {
-        div.classList.add(key + "-1");
+      for (var i = steps; i >= 0; i--) {
+        if (ratio[key] > (1 / steps * i)) {
+          div.classList.add(key + "-" + (i + 1));
+          break;
+        }
       }
     }
   }
-  // add the protection shading
-  // if ((loan.amount < 50 && loan.rate > 8.5) || (loan.amount >= 50 && loan.rate > 6.5)) {
-  //   div.classList.add("current");
-  // }
-  // if ((loan.amount < 75 && loan.rate > 10) || (loan.amount >= 75 && loan.rate > 6.5)) {
-  //   div.classList.add("proposed");
-  // }
   figure.appendChild(div);
 });
 
-var steps = ["count", "clayton", "other", "current", "proposed", "clayton proposed", "other proposed"];
+//add the axes
+var x = figure.querySelector(".x-axis");
+for (var i = bounds.amount.min; i < bounds.amount.max; i += 10) {
+  var label = document.createElement("label");
+  label.style.left = scaleAmount(i) * 100 + "%";
+  label.innerHTML = i;
+  x.appendChild(label);
+}
+
+var y = figure.querySelector(".y-axis");
+for (var i = Math.ceil(bounds.rate.min); i <= bounds.rate.max; i++) {
+  var label = document.createElement("label");
+  label.style.top = scaleRate(i) * 100 + "%";
+  label.innerHTML = i + "%";
+  y.appendChild(label);
+}
+
+var steps = ["count", "clayton", "other", "current count", "proposed count", "clayton proposed", "other proposed"];
 
 //world's simplest navigation
 document.body.addEventListener("click", function(e) {
   var step = e.target.getAttribute("data-goto");
   if (!step) return;
   document.body.setAttribute("data-step", step);
+  document.querySelector("nav .selected").classList.remove("selected");
+  e.target.classList.add("selected");
   mode = step.indexOf("proposed") > -1 ? "proposed" : "current";
   redraw();
 });
@@ -122,7 +141,31 @@ document.body.addEventListener("click", function(e) {
   index += increment * 1;
   if (index < 0 || index == steps.length) return;
   var step = steps[index];
+  document.querySelector("nav .selected").classList.remove("selected");
+  document.querySelector(`nav a[data-goto="${step}"]`).classList.add("selected");
   mode = step.indexOf("proposed") > -1 ? "proposed" : "current";
   redraw();
   document.body.setAttribute("data-step", step);
+});
+
+//hover notification
+var tooltip = figure.querySelector(".tooltip");
+// figure.addEventListener("mouseenter", () => tooltip.classList.add("show"));
+figure.addEventListener("mouseleave", () => tooltip.classList.remove("show"));
+figure.addEventListener("mousemove", function(e) {
+  var bounds = figure.getBoundingClientRect();
+  var x = e.clientX - bounds.left;
+  var y = e.clientY - bounds.top;
+  canvas.style.display = "none";
+  var element = document.elementFromPoint(e.clientX, e.clientY);
+  canvas.style.display = "block";
+  var key = element.getAttribute("data-lookup");
+  if (!key) return tooltip.classList.remove("show");
+  var data = lookup[key];
+  if (!data) return tooltip.classList.remove("show")
+  tooltip.classList.add("show");
+  tooltip.style.left = x + "px";
+  tooltip.style.top = y + "px";
+  tooltip.classList.toggle("right", x > bounds.width / 2);
+  tooltip.innerHTML = tipTemplate(data);
 });
