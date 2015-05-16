@@ -42,8 +42,8 @@ var redraw = function() {
   //create current path
   context.fillStyle = "white";
   context.strokeStyle = shadow;
-  context.strokeText("Current protection", 10, scaleRate(8.5) * canvas.height + 16);
-  context.fillText("Current protection", 10, scaleRate(8.5) * canvas.height + 16);
+  context.strokeText("Current protection", 10, scaleRate(8.5) * canvas.height - 6);
+  context.fillText("Current protection", 10, scaleRate(8.5) * canvas.height - 6);
 
   context.lineWidth = 2;
   context.strokeStyle = "black";
