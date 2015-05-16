@@ -1,7 +1,7 @@
 <ul>
-  <li> <b><%= data.rate %>%</b> rate spread
-  <li> <b>$<%= data.amount %>,000-<%= data.amount + 4 %>,999</b> loans
-  <li> <b><%= data.clayton %></b> Clayton loans
-  <li> <b><%= data.other %></b> other loans
-  <li> <b><%= data.count %></b> total
+  <li> <%= data.loan.rate %>% rate spread
+  <li> $<%= data.loan.amount %>,000-<%= data.loan.amount + 4 %>,999 loans
+  <li class="<%= data.featured == "clayton" ? "featured" : "" %>"> <%= data.loan.clayton %> Clayton loans
+  <li class="<%= data.featured == "other" ? "featured" : "" %>"> <%= data.loan.other %> other loans
+  <li class="<%= data.featured == "count" ? "featured" : "" %>"> <%= data.loan.count %> total
 </ul>

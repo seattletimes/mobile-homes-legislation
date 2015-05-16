@@ -30,13 +30,24 @@ var scaleAmount = amount => (amount - bounds.amount.min) / (bounds.amount.max + 
 var mode = "current";
 
 var redraw = function() {
+  var shadow = "rgba(0, 0, 0, .5)";
+
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
-  context.fillStyle = "rgba(0, 0, 0, .3)";
   context.strokeStyle = "black";
-  context.lineWidth = 2;
-  context.setLineDash([5, 5]);
+  context.lineWidth = 4;
+  context.font = " 16px ff-dagny-web-pro";
+  // context.textAlign = "right";
+  
   //create current path
+  context.fillStyle = "white";
+  context.strokeStyle = shadow;
+  context.strokeText("Current protection", 10, scaleRate(8.5) * canvas.height + 16);
+  context.fillText("Current protection", 10, scaleRate(8.5) * canvas.height + 16);
+
+  context.lineWidth = 2;
+  context.strokeStyle = "black";
+  context.fillStyle = "rgba(0, 0, 0, .3)";
   context.beginPath();
   context.moveTo(-10, scaleRate(8.5) * canvas.height);
   context.lineTo(scaleAmount(50) * canvas.width, scaleRate(8.5) * canvas.height);
@@ -44,14 +55,22 @@ var redraw = function() {
   context.lineTo(canvas.width + 10, scaleRate(6.5) * canvas.height);
   context.lineTo(canvas.width + 10, -10);
   context.lineTo(-10, -10);
+  context.stroke();
   if (mode == "current") {
     //shade this area
-    context.fill();
     return;
   }
-  context.stroke();
+
+  context.lineWidth = 4;
+  context.fillStyle = "white";
+  context.strokeStyle = shadow;
+  context.strokeText("Proposed protection", 10, scaleRate(10) * canvas.height - 6);
+  context.fillText("Proposed protection", 10, scaleRate(10) * canvas.height - 6);
 
   //create proposed path
+  context.lineWidth = 2;
+  context.strokeStyle = "black";
+  context.setLineDash([5, 5]);
   context.beginPath();
   context.moveTo(-10, scaleRate(10) * canvas.height);
   context.lineTo(scaleAmount(75) * canvas.width, scaleRate(10) * canvas.height);
@@ -59,9 +78,10 @@ var redraw = function() {
   context.lineTo(canvas.width + 10, scaleRate(6.5) * canvas.height);
   context.lineTo(canvas.width + 10, -10);
   context.lineTo(-10, -10);
-  context.fill();
+  context.stroke();
   // context.strokeStyle = "black";
   // context.stroke();
+
 };
 
 redraw();
@@ -167,5 +187,6 @@ figure.addEventListener("mousemove", function(e) {
   tooltip.style.left = x + "px";
   tooltip.style.top = y + "px";
   tooltip.classList.toggle("right", x > bounds.width / 2);
-  tooltip.innerHTML = tipTemplate(data);
+  var featured = document.body.getAttribute("data-step").replace(/\s?proposed\s?|\s?current\s?/g, "");
+  tooltip.innerHTML = tipTemplate({ loan: data, featured: featured });
 });

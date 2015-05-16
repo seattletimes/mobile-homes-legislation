@@ -93,8 +93,16 @@ console.log(counts);
       <main class="interactive">
         <h1>Looser loan rules a boon for Buffett company</h1>
 
-        <p>
-          This heat map shows concentrations of 2013 mobile-home loans that had interest rates high enough to require disclosure.
+        <p class="chatter">
+          The heat maps below show concentrations of 2013 mobile-home loans that had interest rates high enough to require disclosure. Click through each one to see Clayton’s share of the loan market and how the company stands to gain from a rollback of consumer safeguards.
+
+        <div class="key">
+          <div class="legend">Fewest loans</div>
+          <% for (var i = 1; i < 9; i++) { %>
+          <div class="cell count-<%= i %> clayton-<%= i %> other-<%= i %>"></div>
+          <% } %>
+          <div class="legend">Most loans</div>
+        </div>
 
         <figure class="heatmap">
           <aside class="x-axis">
@@ -106,7 +114,7 @@ console.log(counts);
         </figure>
 
         <nav>
-          <div class="instructions">Click below to advance</div>
+          <!-- <div class="instructions">Click below to advance</div> -->
           <div class="bar">
             <a data-increment="-1">Previous</a>
             <% ["count", "clayton", "other", "current count", "proposed count", "clayton proposed", "other proposed"].forEach(function(step, i) { %>
@@ -120,7 +128,7 @@ console.log(counts);
         <label for="count">
           <h1>The Loan Landscape</h1>
           <p>
-            Mobile-home loans often have higher interest rates than  typical home loans have, and the gap between those loans gets reported to the government as a "rate spread." To get the real interest rate, add 3.9% to the stated rate spread.
+            Mobile-home loans often have higher interest rates than those of typical home loans, and the gap between those loans gets reported to the government as a "rate spread," indicated by the percentages at left. To get the estimated interest rate on the loans, add 4% to the stated rate spread.
           </p>
         </label>
 
@@ -165,6 +173,9 @@ console.log(counts);
             For other lenders, the proposed rollback would have minimal impact. In total, of the loans that had interest rates that would lose protections under the congressional plan, 91 percent were Clayton loans.
           </p>
         </label>
+
+        <cite class="source">Source: XXX</cite>
+        <div class="credit">Thomas Wilburn / The Seattle Times</div>
 
       </main>
     </responsive-child>

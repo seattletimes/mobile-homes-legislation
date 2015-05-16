@@ -18,9 +18,9 @@
 // width: 11px;
 // height: 11px;
 
-@clayton: lighten(@st-dark-red, 10%);
-@other: lighten(@st-dark-blue, 10%);
-@loans: lighten(@st-dark-green, 10%);
+@clayton: #d8eaf6;
+@other: #efe1ef;
+@loans: #d9e9e5;
 @protected: .4;
 @loss: .4;
 
@@ -29,6 +29,21 @@ main.interactive {
   max-width: 600px;
   margin: auto;
   // padding: 8px;
+  border-top: 1px solid @df-middle-gray;
+  border-bottom: 1px solid @df-middle-gray;
+}
+
+h1 {
+  @media @mobile {
+    font-size: 20px;
+  }
+}
+
+.chatter {
+  font-size: 16px;
+  @media @mobile {
+    font-size: 15px;
+  }
 }
 
 nav {
@@ -68,6 +83,7 @@ nav {
 
     &.selected {
       font-weight: bold;
+      color: black;
     }
   }
 }
@@ -189,94 +205,115 @@ figure.heatmap {
       list-style-type: none;
       padding: 0;
     }
+
+    .featured {
+      font-weight: bold;
+    }
+  }
+}
+
+.key {
+  .display-flex;
+  font-size: 12px;
+  padding: 12px;
+
+  .legend {
+    text-align: center;
+    .flex(1 0 50px);
+  }
+}
+
+.cell {
+  z-index: 0;
+  position: absolute;
+  width: @cellWidth;
+  height: @cellHeight;
+  background: @df-light-gray;
+  transition: background .5s linear, opacity .5s linear;
+  // outline: 1px solid white;
+  // transform: translateZ(0);
+
+  &.gap {
+    background: transparent;
   }
 
-  .cell {
-    z-index: 0;
-    position: absolute;
-    width: @cellWidth;
-    height: @cellHeight;
-    background: @df-light-gray;
-    transition: background .5s linear, opacity .5s linear;
-    // outline: 1px solid white;
-    // transform: translateZ(0);
+  .key & {
+    position: relative;
+    .flex(1);
+    height: auto;
+  }
 
-    &.gap {
-      background: transparent;
+  [data-step~=count] & {
+    &.count-8 { background-color: darken(@loans, 80%) }
+    &.count-7 { background-color: darken(@loans, 70%) }
+    &.count-6 { background-color: darken(@loans, 60%) }
+    &.count-5 { background-color: darken(@loans, 50%) }
+    &.count-4 { background-color: darken(@loans, 40%) }
+    &.count-3 { background-color: darken(@loans, 30%) }
+    &.count-2 { background-color: darken(@loans, 20%) }
+    &.count-1 { background-color: darken(@loans, 10%) }
+  }
+
+  [data-step~=clayton] & {
+    & { background: transparent }
+    &.clayton-8 { background-color: darken(@clayton, 80%) }
+    &.clayton-7 { background-color: darken(@clayton, 70%) }
+    &.clayton-6 { background-color: darken(@clayton, 60%) }
+    &.clayton-5 { background-color: darken(@clayton, 50%) }
+    &.clayton-4 { background-color: darken(@clayton, 40%) }
+    &.clayton-3 { background-color: darken(@clayton, 30%) }
+    &.clayton-2 { background-color: darken(@clayton, 20%) }
+    &.clayton-1 { background-color: darken(@clayton, 10%) }
+  }
+
+  [data-step~=other] & {
+    & { background: transparent }
+    &.other-8 { background-color: darken(@other, 80%) }
+    &.other-7 { background-color: darken(@other, 70%) }
+    &.other-6 { background-color: darken(@other, 60%) }
+    &.other-5 { background-color: darken(@other, 50%) }
+    &.other-4 { background-color: darken(@other, 40%) }
+    &.other-3 { background-color: darken(@other, 30%) }
+    &.other-2 { background-color: darken(@other, 20%) }
+    &.other-1 { background-color: darken(@other, 10%) }
+  }
+
+  [data-step~=current] & {
+
+    &.current {
+      background: red;
+      opacity: @protected;
     }
 
-    [data-step~=count] & {
-      &.count-8 { background-color: darken(@loans, 50%) }
-      &.count-7 { background-color: darken(@loans, 45%) }
-      &.count-6 { background-color: darken(@loans, 40%) }
-      &.count-5 { background-color: darken(@loans, 35%) }
-      &.count-4 { background-color: darken(@loans, 30%) }
-      &.count-3 { background-color: darken(@loans, 25%) }
-      &.count-2 { background-color: darken(@loans, 20%) }
-      &.count-1 { background-color: darken(@loans, 10%) }
+    &.border {
+      border-width: 1px 1px 0 0;
+      border-color: black;
+      border-style: solid;
+    }
+  }
+
+  [data-step~=proposed] & {
+    &.proposed {
+      background: red;
+      opacity: @protected;
+    }
+    &.current:not(.proposed) { 
+      background: blue;
+      opacity: @loss;
+    }
+  }
+
+  [data-step="clayton proposed"] {
+
+    &.current:not(.proposed) {
+      outline: 1px solid white;
     }
 
-    [data-step~=clayton] & {
-      & { background: transparent }
-      &.clayton-8 { background-color: darken(@clayton, 50%) }
-      &.clayton-7 { background-color: darken(@clayton, 45%) }
-      &.clayton-6 { background-color: darken(@clayton, 40%) }
-      &.clayton-5 { background-color: darken(@clayton, 35%) }
-      &.clayton-4 { background-color: darken(@clayton, 30%) }
-      &.clayton-3 { background-color: darken(@clayton, 25%) }
-      &.clayton-2 { background-color: darken(@clayton, 20%) }
-      &.clayton-1 { background-color: darken(@clayton, 10%) }
-    }
-
-    [data-step~=other] & {
-      & { background: transparent }
-      &.other-8 { background-color: darken(@other, 50%) }
-      &.other-7 { background-color: darken(@other, 45%) }
-      &.other-6 { background-color: darken(@other, 40%) }
-      &.other-5 { background-color: darken(@other, 35%) }
-      &.other-4 { background-color: darken(@other, 30%) }
-      &.other-3 { background-color: darken(@other, 25%) }
-      &.other-2 { background-color: darken(@other, 20%) }
-      &.other-1 { background-color: darken(@other, 10%) }
-    }
-
-    [data-step~=current] & {
-
-      &.current {
-        background: red;
-        opacity: @protected;
-      }
-
-      &.border {
-        border-width: 1px 1px 0 0;
-        border-color: black;
-        border-style: solid;
-      }
-    }
-
-    [data-step~=proposed] & {
-      &.proposed {
-        background: red;
-        opacity: @protected;
-      }
-      &.current:not(.proposed) { 
-        background: blue;
-        opacity: @loss;
-      }
-    }
-
-    [data-step="clayton proposed"] {
-
-      &.current:not(.proposed) {
-        outline: 1px solid white;
-      }
-
-      &.clayton-5.proposed { background-color: red }
-      &.clayton-4.proposed { background-color: darken(lighten(red, 10%), 20%) }
-      &.clayton-3.proposed { background-color: darken(lighten(red, 20%), 20%) }
-      &.clayton-2.proposed { background-color: darken(lighten(red, 30%), 20%) }
-      &.clayton-1.proposed { background-color: darken(lighten(red, 40%), 20%) }
-    }
+    &.clayton-5.proposed { background-color: red }
+    &.clayton-4.proposed { background-color: darken(lighten(red, 10%), 20%) }
+    &.clayton-3.proposed { background-color: darken(lighten(red, 20%), 20%) }
+    &.clayton-2.proposed { background-color: darken(lighten(red, 30%), 20%) }
+    &.clayton-1.proposed { background-color: darken(lighten(red, 40%), 20%) }
   }
 }
 
@@ -319,4 +356,14 @@ figure.heatmap {
   .show-label("clayton proposed");
   .show-label("other proposed");
 
+}
+
+.source {
+  font-size: 12px;
+}
+
+.credit {
+  font-size: 12px;
+  text-align: right;
+  text-transform: uppercase;
 }
