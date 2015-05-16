@@ -95,14 +95,35 @@ console.log(counts);
 
         <p class="chatter">
           The heat maps below show concentrations of 2013 mobile-home loans that had interest rates high enough to require disclosure. Click through each one to see Clayton’s share of the loan market and how the company stands to gain from a rollback of consumer safeguards.
+        </p>
 
-        <div class="key">
-          <div class="legend">Fewest loans</div>
-          <% for (var i = 1; i < 9; i++) { %>
-          <div class="cell count-<%= i %> clayton-<%= i %> other-<%= i %>"></div>
-          <% } %>
-          <div class="legend">Most loans</div>
-        </div>
+        <label for="count">
+          <h1>The Loan Landscape</h1>
+        </label>
+
+        <label for="clayton">
+          <h1>Clayton's loans</h1>
+        </label>
+
+        <label for="other">
+          <h1>Loans from other lenders</h1>
+        </label>
+
+        <label for="current count">
+          <h1>Current protection for borrowers</h1>
+        </label>
+
+        <label for="proposed count">
+          <h1>Proposed rollback</h1>
+        </label>
+
+        <label for="clayton proposed">
+          <h1>Clayton's gain, borrower's loss</h1>
+        </label>
+
+        <label for="other proposed">
+          <h1>Not much impact for other lenders</h1>
+        </label>
 
         <figure class="heatmap">
           <aside class="x-axis">
@@ -112,6 +133,14 @@ console.log(counts);
           <canvas class="shader"></canvas>
           <div class="tooltip"></div>
         </figure>
+
+        <div class="key">
+          <div class="legend">Fewest loans</div>
+          <% for (var i = 1; i < 9; i++) { %>
+          <div class="cell count-<%= i %> clayton-<%= i %> other-<%= i %>"></div>
+          <% } %>
+          <div class="legend">Most loans</div>
+        </div>
 
         <nav>
           <!-- <div class="instructions">Click below to advance</div> -->
@@ -126,49 +155,42 @@ console.log(counts);
 
         <!-- per-viz chatter -->
         <label for="count">
-          <h1>The Loan Landscape</h1>
           <p>
             Mobile-home loans often have higher interest rates than those of typical home loans, and the gap between those loans gets reported to the government as a "rate spread," indicated by the percentages at left. To get the estimated interest rate on the loans, add 4% to the stated rate spread.
           </p>
         </label>
 
         <label for="clayton">
-          <h1>Clayton's loans</h1>
           <p>
             Clayton Homes, owned by Warren Buffett's Berkshire Hathaway, is by far the mobile-home industry's largest lender. The company's loans tend to have rates far higher than those of  typical home loans. In 2013, Clayton's highest concentration of loans was for those around $70,000 and a rate spread of about 7 percentage points, meaning many Clayton interest rates likely exceeded 10 percent.
           </p>
         </label>
 
         <label for="other">
-          <h1>Loans from other lenders</h1>
           <p>
             In contrast, loans provided by non-Clayton lenders tend to have a much lower interest-rate spread. 
           </p>
         </label>
 
         <label for="current count">
-          <h1>Current protection for borrowers</h1>
           <p>
             Sweeping reforms approved after the nation's financial crisis included protections for mobile-home loans with high interest rates. Under rules in effect in 2014, consumers get additional protections for loans that have a rate spread over 6.5 percentage points – or 8.5 percentage points if the loan is under $50,000.
           </p>
         </label>
 
         <label for="proposed count">
-          <h1>Proposed rollback</h1>
           <p>
             Congress is considering a plan that would roll back some of the protections. Under the proposal, loans under $75,000 would need to have a rate spread of more than 10 percentage points to qualify for additional protections.
           </p>
         </label>
 
         <label for="clayton proposed">
-          <h1>Clayton's gain, borrower's loss</h1>
           <p>
             The plan to curtail consumer protections would be a boon for Clayton. Under the proposed law, the segment of the loan pool that benefits most from the relaxed rules neatly matches the greatest concentration of Clayton loans. If the changes were applied to 2013 data, more than 5,100 of Clayton's loans would fall in the gap created by the new law.
           </p>
         </label>
 
         <label for="other proposed">
-          <h1>Not much impact for other lenders</h1>
           <p>
             For other lenders, the proposed rollback would have minimal impact. In total, of the loans that had interest rates that would lose protections under the congressional plan, 91 percent were Clayton loans.
           </p>
